@@ -158,31 +158,6 @@ http://127.0.0.1:8000
 
 ### Project Structure
 
-voice-agent/
-│── app/
-│   ├── main.py          # FastAPI entry point
-│   ├── models/          # Pydantic schemas
-│   │   ├── llm.py
-│   │   └── chat.py
-│   ├── services/        # External services logic
-│   │   ├── assemblyai.py
-│   │   ├── gemini.py
-│   │   └── murf.py
-│   ├── routes/          # API endpoints
-│   │   ├── llm_routes.py
-│   │   ├── chat_routes.py
-│   │   ├── tts_routes.py
-│   │   └── upload_routes.py
-│   ├── utils/           # Utility functions (logging, error handlers)
-│   │   └── logger.py
-│   └── __init__.py
-│
-│── static/
-│── templates/
-│── uploads/
-│── .env
-│── README.md
-│── requirements.txt
 
 <img width="334" height="676" alt="image" src="https://github.com/user-attachments/assets/ce090739-1197-4db2-876d-ebb65c94fb9a" />
 
