@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>AI Voice Assistant 🎤</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: white;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 40px 10px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        p {
+            opacity: 0.85;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+        }
+
+        /* Mic button */
+        .mic-btn {
+            background: radial-gradient(circle at 30% 30%, #ff4e50, #f9d423);
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin: 20px auto;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 0 20px rgba(255, 78, 80, 0.7);
+        }
+
+        .mic-btn:hover {
+            transform: scale(1.08);
+        }
+
+        .mic-btn.recording {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 78, 80, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 20px rgba(255, 78, 80, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 78, 80, 0);
+            }
+        }
+
+        .output-box {
+            text-align: left;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            white-space: pre-wrap;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>AI Voice Assistant 🎤</h1>
+        <p>Speak to the AI and hear its response instantly.</p>
+
+        <!-- Single Record Button -->
+        <div id="micButton" class="mic-btn">🎙️</div>
+
+        <!-- Output text -->
+        <div class="output-box">
+            <strong>Transcription:</strong> <span id="transcriptionText">—</span>
+        </div>
+        <div class="output-box">
+            <strong>AI Response:</strong> <span id="llmText">—</span>
+        </div>
+
+        <!-- Hidden Audio Player -->
+        <audio id="responseAudio" style="display:none"></audio>
+    </div>
+
+    <script>
+        let mediaRecorder, audioChunks = [], isRecording = false, sessionId;
+
+        function getSessionId() {
+            const params = new URLSearchParams(window.location.search);
+            let sid = params.get("session_id");
+            if (!sid) {
+                sid = crypto.randomUUID();
+                params.set("session_id", sid);
+                window.history.replaceState({}, "", `${location.pathname}?${params}`);
+            }
+            return sid;
+        }
+        sessionId = getSessionId();
+
+        const micBtn = document.getElementById('micButton');
+        const transcriptionText = document.getElementById('transcriptionText');
+        const llmText = document.getElementById('llmText');
+        const responseAudio = document.getElementById('responseAudio');
+
+        micBtn.onclick = () => {
+            if (!isRecording) {
+                startRecording();
+            } else {
+                stopRecordingAndSend();
+            }
+        };
+
+        function startRecording() {
+            navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.start();
+                micBtn.classList.add('recording');
+                isRecording = true;
+            }).catch(err => {
+                alert("Microphone access denied");
+                console.error(err);
+            });
+        }
+
+        function stopRecordingAndSend() {
+            mediaRecorder.stop();
+            micBtn.classList.remove('recording');
+            isRecording = false;
+
+            mediaRecorder.onstop = async () => {
+                const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                const fd = new FormData();
+                fd.append('file', blob, 'recording.webm');
+
+                transcriptionText.innerText = "Processing...";
+                llmText.innerText = "Processing...";
+                responseAudio.src = "";
+
+                try {
+                    const res = await fetch(`/agent/chat/${sessionId}`, { method: "POST", body: fd });
+                    const json = await res.json();
+                    if (!res.ok) throw new Error(json.detail || "Error");
+
+                    transcriptionText.innerText = json.transcription || "—";
+                    llmText.innerText = json.llm_text || "—";
+
+                    if (json.murf_audio_url) {
+                        responseAudio.src = json.murf_audio_url;
+                        responseAudio.play().catch(() => { });
+                    }
+                } catch (err) {
+                    console.error(err);
+                    transcriptionText.innerText = "—";
+                    llmText.innerText = "I'm having trouble connecting right now.";
+                    speakFallback("I'm having trouble connecting right now.");
+                }
+            };
+        }
+
+        function speakFallback(text) {
+            const synth = window.speechSynthesis;
+            const utterance = new SpeechSynthesisUtterance(text);
+            synth.speak(utterance);
+        }
+
+        responseAudio.addEventListener("ended", () => {
+            startRecording();
+        });
+    </script>
+</body>
+
+</html>
