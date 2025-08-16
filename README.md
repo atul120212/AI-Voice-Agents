@@ -1,4 +1,4 @@
-<img width="376" height="562" alt="structure" src="https://github.com/user-attachments/assets/2ec1d780-21ee-484e-b40f-c8c574453a74" /># 🎙️ 30 Days of AI Voice Agents — Day 13: Documentation
+# 🎙️ 30 Days of AI Voice Agents — Day 13: Documentation
 
 An AI-powered **Voice Agent** built with **FastAPI**, **Google Gemini**, **AssemblyAI**, and **Murf**, enabling real-time voice conversations with AI.  
 You can speak to the agent, and it will respond in **text** and **natural-sounding voice**.
