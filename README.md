@@ -1,4 +1,4 @@
-# 🎙️ 30 Days of AI Voice Agents — Day 13: Documentation
+<img width="376" height="562" alt="structure" src="https://github.com/user-attachments/assets/2ec1d780-21ee-484e-b40f-c8c574453a74" /># 🎙️ 30 Days of AI Voice Agents — Day 13: Documentation
 
 An AI-powered **Voice Agent** built with **FastAPI**, **Google Gemini**, **AssemblyAI**, and **Murf**, enabling real-time voice conversations with AI.  
 You can speak to the agent, and it will respond in **text** and **natural-sounding voice**.
@@ -153,11 +153,41 @@ http://127.0.0.1:8000
 
 ### Main UI
 
-![UI Screenshot](screenshots/ui.png)
+<img width="2496" height="1180" alt="ui" src="https://github.com/user-attachments/assets/7ed9a1e8-3ae8-44ca-8a9c-363b0f7c00c4" />
+
 
 ### Project Structure
 
-![Folder Structure](screenshots/structure.png)
+voice-agent/
+│── app/
+│   ├── main.py          # FastAPI entry point
+│   ├── models/          # Pydantic schemas
+│   │   ├── llm.py
+│   │   └── chat.py
+│   ├── services/        # External services logic
+│   │   ├── assemblyai.py
+│   │   ├── gemini.py
+│   │   └── murf.py
+│   ├── routes/          # API endpoints
+│   │   ├── llm_routes.py
+│   │   ├── chat_routes.py
+│   │   ├── tts_routes.py
+│   │   └── upload_routes.py
+│   ├── utils/           # Utility functions (logging, error handlers)
+│   │   └── logger.py
+│   └── __init__.py
+│
+│── static/
+│── templates/
+│── uploads/
+│── .env
+│── README.md
+│── requirements.txt
+
+<img width="334" height="676" alt="image" src="https://github.com/user-attachments/assets/ce090739-1197-4db2-876d-ebb65c94fb9a" />
+
+
+
 
 ---
 
